@@ -20,25 +20,25 @@ The script that starts the songs uses a random shuffle.
 
 Use SSH to remote into your Falcon Player device or open a command shell from the Falcon Player web interface.
 
-1. Create a directory (this will be separate from your sequence music).
+### 1. Create a directory (this will be separate from your sequence music).
 
 ```bash
 mkdir -p ~/media/aftershow/christmas
 ```
 
-2. Check if mplayer is installed (probably not).
+### 2. Check if mplayer is installed (probably not).
 
 ```bash
 which mplayer
 ```
 
-3. Install mplayer if not already installed.
+### 3. Install mplayer if not already installed.
 
 ```bash
 sudo apt update && sudo apt -y install mplayer
 ```
 
-4. Create two scripts:
+### 4. Create and Upload two scripts:
 
 One to start the music:
 
@@ -60,11 +60,22 @@ sudo killall mplayer
 
 > Note that you can use the same stop script for all holidays, but the start script points to a specific holiday directory (which I will get to later).
 
-5. Upload these via the Falcon player web interface under scripts.
+Upload these via the Falcon player web interface under scripts.
 
-6. Add the start and stop scripts to your pre and post sequence playlist.
+### 6. Schedule start and stop scripts
 
-7. Also be sure to schedule a daily start and stop.
+For pre-show music, add the start script to a daily schedule. Then be sure to execute the stop script before your show playlist begins (Lead In).
+
+For post-show music, add the start script to the end of your sequence (Lead Out). Also be sure to schedule a daily stop.
+
+For example:
+
+- In Scheduler:
+    - add a start script: Black Friday to Epiphany, Everyday, 3:00 PM, Command, Run Script: AfterShowMusic-start-christmas.sh
+	- add an end script: 2025-10-01 to 2028-12-31, Everyday, 1:00 AM, Command, Run Script: AfterShowMusic-stop.sh
+- In Holiday Specific Playlist:
+	- Lead In: Script: AfterShowMusic-stop.sh, Blocking false
+	- Lead Out: Script: AfterShowMusic-start-christmas.sh, Blocking false
 
 ## Add Music
 
