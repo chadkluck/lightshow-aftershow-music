@@ -1,66 +1,86 @@
 # Set-Up Music for Pre/Post Show
 
-I had been using the AfterHours plug-in, but was finding it hard to find streaming stations and I no longer wanted to use the bandwidth. I just wanted to use my own playlist.
+I had been using the AfterHours plug-in, but was finding it hard to find streaming stations and I no longer wanted to use the bandwidth. I just wanted to use my own playlist directly from the Pi.
 
-Adapted from post on the [Falcon Christmas Forum: Playing random music when show is off](https://falconchristmas.com/forum/index.php?topic=5632.0).
+The method I am using is adapted from a post on the [Falcon Christmas Forum: Playing random music when show is off](https://falconchristmas.com/forum/index.php?topic=5632.0).
 
-The post was from 2016, and I decided to update it with complete step by step instructions.
+The post was from 2016, and I decided to update it with complete step by step instructions along with a few scripts.
 
 These instructions:
 
-- Create a separate directory to store holiday MP3 files
-- Install and utilize mplayer
-- Create 2 shell scripts which are added to the schedule and playlist
+- Create a separate directory under `~/media/aftershow/` for each holiday to store holiday MP3 files
+- Install and utilize `mplayer` to play the music
+- Upload shell scripts to manage and start and stop the playlist
 - Upload a zip file containing all songs to play
-- Unzip and generate a playlist file
+- Using a shell script, unzip and generate a playlist file
 
-The script that starts the songs uses a random shuffle.
+All the scripts will utilize a holiday specific directory to store the music:
+
+`~/media/aftershow/{holiday}`
 
 ## Initial Set-Up
 
 Use SSH to remote into your Falcon Player device or open a command shell from the Falcon Player web interface.
 
-### 1. Create a directory (this will be separate from your sequence music).
+### 1. Install mplayer if not already installed.
 
-```bash
-mkdir -p ~/media/aftershow/christmas
-```
-
-### 2. Check if mplayer is installed (probably not).
+Check if mplayer is already installed:
 
 ```bash
 which mplayer
 ```
 
-### 3. Install mplayer if not already installed.
+Install if not already installed:
 
 ```bash
 sudo apt update && sudo apt -y install mplayer
 ```
 
-### 4. Create and Upload two scripts:
+### 2. Upload Scripts
 
-One to start the music:
+We will use 3 scripts:
 
-```sh
-#AfterShowMusic-start-christmas.sh
-# Ensure that MPlayer is not running
-sudo killall mplayer
-# Start Playback in random order
-sudo mplayer -shuffle -loop 0 -playlist /home/fpp/media/aftershow/christmas/playlist.txt
+- [AfterShowMusic-unzip.sh](./AfterShowMusic-unzip.sh) : to unzip and create playlist from uploaded music zip file
+- [AfterShowMusic-start.sh](./AfterShowMusic-start.sh) : to start playing music for a specific holiday
+- [AfterShowMusic-stop.sh](./AfterShowMusic-stop.sh) : to stop playing music
+
+Upload these 3 scripts via the Falcon player web interface under scripts.
+
+### 3. Create the directory structure for holiday music
+
+All the scripts will utilize a holiday specific directory to store the music:
+
+`~/media/aftershow/{holiday}`
+
+Create a holiday directory, for example for `christmas` use:
+
+```bash
+mkdir -p ~/media/aftershow/christmas
 ```
 
-A Second to stop the music:
+### 4. Add Music
 
-```sh
-#AfterShowMusic-stop.sh
-#Ensure that MPlayer is not running
-sudo killall mplayer
+Upload a zip file of your music via the Falcon Player web interface.
+
+Make sure it is named `music.zip`, otherwise you will need to change the filename.
+
+This will place it in the ~/media/upload/ directory. If you didn't name it `music.zip` you can rename it now.
+
+### 5. Unzip and Create Playlist
+
+We will now use the Falcon browser CLI or Putty to SSH and run the commands to move the zip file, extract, and create a playlist.
+
+Run the unzip script to move the zip file, extract the mp3 files, and create a playlist.
+
+> Note: The scripts remove the zip file when complete. Make sure you keep local copies of your music, or modify the scripts to move a copy to an archival directory on the Pi.
+
+This example is for `christmas`, use whatever holiday directory you created to store the music.
+
+```bash
+./AfterShowMusic-unzip.sh christmas delete
 ```
 
-> Note that you can use the same stop script for all holidays, but the start script points to a specific holiday directory (which I will get to later).
-
-Upload these via the Falcon player web interface under scripts.
+The optional `delete` argument will remove any existing mp3 files in the holiday directory before unzipping the new files. If you want to keep existing files and just add new ones, skip the `delete` argument.
 
 ### 6. Schedule start and stop scripts
 
@@ -71,31 +91,8 @@ For post-show music, add the start script to the end of your sequence (Lead Out)
 For example:
 
 - In Scheduler:
-    - add a start script: Black Friday to Epiphany, Everyday, 3:00 PM, Command, Run Script: AfterShowMusic-start-christmas.sh
-	- add an end script: 2025-10-01 to 2028-12-31, Everyday, 1:00 AM, Command, Run Script: AfterShowMusic-stop.sh
+    - add a start script: Black Friday to Epiphany, Everyday, 3:00 PM, Command, Run Script: AfterShowMusic-start.sh with argument for holiday directory (such as `christmas`)
+	- add an end script: 2025-10-01 to 2030-12-31, Everyday, 1:00 AM, Command, Run Script: AfterShowMusic-stop.sh (It doesn't matter if it never starts for the day, just run the stop script every day)
 - In Holiday Specific Playlist:
 	- Lead In: Script: AfterShowMusic-stop.sh, Blocking false
-	- Lead Out: Script: AfterShowMusic-start-christmas.sh, Blocking false
-
-## Add Music
-
-Upload a zip file of your music via the Falcon Player web interface. (Make sure it is named music.zip, otherwise you will need to change the filename in the next command.)
-
-This will place it in the ~/media/upload/ directory.
-
-We will now use the Falcon browser CLI or Putty to SSH and run the commands to move the zip file, extract, and create a playlist.
-
-I separate my music into holidays under the `~/media/aftershow/` directory. For this example, we will use `christmas`.
-
-Move the zip to ~/media/aftershow/christmas, extract, and create playlist:
-
-```bash
-# (optional) remove existing mp3 files (skip/comment out if your music.zip is additive and not replacing)
-rm ~/media/aftershow/christmas/*.mp3
-mv ~/media/upload/music.zip ~/media/aftershow/christmas/music.zip
-cd ~/media/aftershow/christmas/
-unzip -n music.zip && rm music.zip
-# remove spaces in file names
-find . -name "* *" -type f -exec bash -c 'mv "$1" "${1// /_}"' _ {} \;
-find ~/media/aftershow/christmas/* -iname \*.mp3 -type f > ~/media/aftershow/christmas/playlist.txt
-```
+	- Lead Out: Script: AfterShowMusic-start.sh, Blocking false, With argument for holiday directory (such as `christmas`)
