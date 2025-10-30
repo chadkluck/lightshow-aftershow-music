@@ -47,7 +47,7 @@ One to start the music:
 # Ensure that MPlayer is not running
 sudo killall mplayer
 # Start Playback in random order
-sudo mplayer -shuffle -playlist /home/fpp/media/aftershow/christmas/playlist.txt
+sudo mplayer -shuffle -loop 0 -playlist /home/fpp/media/aftershow/christmas/playlist.txt
 ```
 
 A Second to stop the music:
