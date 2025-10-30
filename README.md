@@ -8,11 +8,12 @@ The post was from 2016, and I decided to update it with complete step by step in
 
 These instructions:
 
-- Create a separate directory under `~/media/aftershow/` for each holiday to store holiday MP3 files
-- Install and utilize `mplayer` to play the music
-- Upload shell scripts to manage and start and stop the playlist
-- Upload a zip file containing all songs to play
-- Using a shell script, unzip and generate a playlist file
+1. Install mplayer if not already installed
+2. Upload the scripts
+3. Create the directory structure for holiday music
+4. Upload music in a zip file
+5. Unzip and create playlist using a script
+6. Schedule start and stop scripts
 
 All the scripts will utilize a holiday specific directory to store the music:
 
@@ -22,7 +23,7 @@ All the scripts will utilize a holiday specific directory to store the music:
 
 Use SSH to remote into your Falcon Player device or open a command shell from the Falcon Player web interface.
 
-### 1. Install mplayer if not already installed.
+### 1. Install mplayer if not already installed
 
 Check if mplayer is already installed:
 
@@ -58,7 +59,7 @@ Create a holiday directory, for example for `christmas` use:
 mkdir -p ~/media/aftershow/christmas
 ```
 
-### 4. Add Music
+### 4. Upload Music in a Zip file
 
 Upload a zip file of your music via the Falcon Player web interface.
 
@@ -66,7 +67,7 @@ Make sure it is named `music.zip`, otherwise you will need to change the filenam
 
 This will place it in the ~/media/upload/ directory. If you didn't name it `music.zip` you can rename it now.
 
-### 5. Unzip and Create Playlist
+### 5. Unzip and Create Playlist using a script
 
 We will now use the Falcon browser CLI or Putty to SSH and run the commands to move the zip file, extract, and create a playlist.
 
